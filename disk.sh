@@ -1,16 +1,14 @@
 #!/bin/bash
 
-MAX_USAGE=30  # Renamed threshold to MAX_USAGE
-# Extract the disk usage percentage for the root directory ('/')
-CURRENT_USAGE=$(df -h | grep ' /$' | awk '{print $5}' | sed 's/%//')  # Removed redundant awk and used sed to strip the '%'
+THRESHOLD=30
+USAGE=$(df -h | awk '/ \/$/ {gsub("%",""); print $5}')
 
-echo "Current disk usage: ${CURRENT_USAGE}%"
+echo "Current disk usage: ${USAGE}%"
 
-if [ "$CURRENT_USAGE" -gt "$MAX_USAGE" ]; then
-    echo "Warning: Disk usage is too high: ${CURRENT_USAGE}% (Threshold: ${MAX_USAGE}%)"
-    exit 1  # Critical condition, exit with non-zero code
+if [ "$USAGE" -gt "$THRESHOLD" ]; then
+    echo "Alert: Disk usage exceeds the threshold: ${USAGE}% (Limit: ${THRESHOLD}%)"
+    exit 1
 else
-    echo "Disk usage is within acceptable limits: ${CURRENT_USAGE}% (Threshold: ${MAX_USAGE}%)"
-    exit 0  # Normal condition, exit with zero code
+    echo "Disk usage is under control: ${USAGE}% (Limit: ${THRESHOLD}%)"
+    exit 0
 fi
-
