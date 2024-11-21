@@ -1,6 +1,6 @@
 #!/bin/bash
 
-THRESHOLD=30
+THRESHOLD=80
 USAGE=$(df -h | awk '/ \/$/ {gsub("%",""); print $5}')
 
 echo "Current disk usage: ${USAGE}%"
