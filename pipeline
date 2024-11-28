@@ -1,36 +1,51 @@
 pipeline {
     agent any
     environment {
-        REPOSITORY_URL = 'https://github.com/SARTHAKBORDIA/pipeline.git' 
-        TARGET_BRANCH = 'main' 
+        REPO_URL = 'https://github.com/SARTHAKBORDIA/pipeline.git'
+        BRANCH = 'main'  // Update to the appropriate branch name
     }
     stages {
-        stage('Checkout Code') { 
+        stage('Clone Repository') {
             steps {
-                git branch: "${TARGET_BRANCH}", url: "${REPOSITORY_URL}"
-                echo "showing output of script example.sh.."
-                sh 'chmod +x example.sh && ./example.sh'
+                git branch: "${BRANCH}", url: "${REPO_URL}"
             }
         }
-        stage('Disk Utilization Check') { 
+        stage('Monitor Disk Utilization') {
             steps {
-                echo 'Verifying Disk Space Usage...'
-                sh 'chmod +x disk.sh && ./disk.sh'
+                echo 'Checking Disk Utilization...'
+                sh 'chmod +x disk.sh'
+                script {
+                    // Run the script and capture the exit status
+                    def status = sh(
+                        script: './disk.sh',
+                        returnStatus: true // Capture only the exit status, not the output
+                    )
+
+                    // Check the exit status and decide whether to send an email
+                    if (status != 0) { // Exit status 0 means success; non-zero means failure
+                        echo "Disk usage exceeded threshold. Sending email..."
+                        sh '''
+                            echo "Disk usage critical. Please take necessary action!" | mail -s "Disk Utilization Alert" sarthakbordia10@gmail.com
+                        '''
+                    } else {
+                        echo "Disk usage is under control."
+                    }
+                }
             }
         }
-        stage('Manage Processes') { 
+        stage('Process Management') {
             steps {
-                echo 'Running Process Management Script...'
+                echo 'Executing Process Management Script...'
                 sh 'chmod +x process.sh && ./process.sh'
             }
         }
     }
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo 'Pipeline executed successfully!'
         }
         failure {
-            echo 'Pipeline failed. Review the logs for more information.'
+            echo 'Pipeline execution failed. Check logs for details.'
         }
     }
 }
