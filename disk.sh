@@ -7,7 +7,7 @@ echo "Current disk usage: ${USAGE}%"
 
 if [ "$USAGE" -gt "$THRESHOLD" ]; then
     echo "Alert: Disk usage exceeds the threshold: ${USAGE}% (Limit: ${THRESHOLD}%)"
-    echo "USAGE=$USAGE" > disk_usage.env # Export the usage to a file
+    echo "USAGE=$USAGE" > disk_usage.env 
     exit 1
 else
     echo "Disk usage is under control: ${USAGE}% (Limit: ${THRESHOLD}%)"
