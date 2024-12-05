@@ -1,0 +1,52 @@
+pipeline {   
+    agent any 
+
+    tools {
+        jdk 'jdk11' 
+        maven 'mv'
+    }
+    
+    options {
+        timeout(time: 5, unit: 'MINUTES') 
+        skipDefaultCheckout() 
+    }
+
+    parameters {
+        string(name: 'BRANCH', defaultValue: 'main', description: 'Specify the branch to build')
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git branch: "${params.BRANCH}", url: 'https://github.com/Isarthak26/javaApp.git'
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                sh "mvn compile"
+            }
+        }
+        
+        stage('Package Application') {
+            steps {
+                sh "mvn clean package"
+            }
+        }
+        
+        stage('Publish Build Artifacts') {
+            steps {
+                archiveArtifacts artifacts: '*/target/*.jar', allowEmptyArchive: true
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo "Pipeline completed successfully for branch ${params.BRANCH}"
+        }
+        failure {
+            echo "Pipeline failed for branch ${params.BRANCH}"
+        }
+    }
+}
